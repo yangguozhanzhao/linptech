@@ -32,3 +32,8 @@
         time.sleep(5)
         lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
   ```
+
+## 上传pypi
+
+- 修改setup.py的版本
+- 执行上传命令 `python setup.py sdist upload -r pypi`

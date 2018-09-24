@@ -1,4 +1,3 @@
-
 import sys
 import threading
 import time
@@ -63,6 +62,16 @@ class LinptechSerial(threading.Thread):
 			except queue.Empty:
 				pass
 
+	def split_buffer(self,buffer):
+		index = buffer.find("55",2*min(CON.RECEIVE_LEN_LIST))
+		if int(index/2) in CON.RECEIVE_LEN_LIST :
+			prev_buffer=buffer[0:index]
+			if Packet.check(prev_buffer):
+				self.receive_queue.put(prev_buffer)
+			return buffer[index:]
+		else:
+			return buffer[index:]
+
 	def run(self):
 		"""
 		run when self.start()
@@ -73,14 +82,16 @@ class LinptechSerial(threading.Thread):
 			try:
 				number = self.ser.inWaiting()
 				# print(number)
-				if number in CON.RECEIVE_LEN_LIST:
+				if number >= min(CON.RECEIVE_LEN_LIST):
 					logging.debug("numner=%s" % number)
 					self.buffer += str(binascii.b2a_hex(self.ser.read(number)),encoding="utf-8")
 					logging.debug("buffer=%s" % self.buffer)
 					self.ser.flushInput()
+					# 多组数据同时进入，进行递归分割
+					while len(self.buffer) >= 4*min(CON.RECEIVE_LEN_LIST):
+						self.buffer=self.split_buffer(self.buffer)
 					if Packet.check(self.buffer):
 						self.receive_queue.put(self.buffer)
-					self.buffer=""
 			except serial.SerialException:
 				print("error")
 				logging.error('Serial port exception! (device disconnected or multiple access on port?)')
@@ -100,7 +111,8 @@ class LinptechSerial(threading.Thread):
 if __name__=="__main__":
 	logging.getLogger().setLevel(logging.DEBUG)
 	print(CON.RECEIVE_LEN_LIST)
-	port ='/dev/tty.SLAB_USBtoUART'
+	#port ='/dev/tty.SLAB_USBtoUART'
+	port ="COM3"
 	def receive(data,optional):
 		print(data,optional)
 	lp_serial=LinptechSerial(port,receive=receive)
@@ -108,6 +120,6 @@ if __name__=="__main__":
 	lp_serial.start()
 	while lp_serial.is_alive():
 		time.sleep(5)
-		lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
+		#lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
 		time.sleep(5)
-		lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
+		#lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
