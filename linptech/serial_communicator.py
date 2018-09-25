@@ -112,7 +112,8 @@ class LinptechSerial(threading.Thread):
 						self.buffer=""
 			except:
 				self.restart()
-
+			
+			self.get_from_receive_queue()
 			# # If there's messages in transmit queue，send them
 			packet = self.get_from_send_queue()
 			if packet:

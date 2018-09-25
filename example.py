@@ -8,7 +8,7 @@ print(CON.RECEIVE_LEN_LIST)
 #port ='/dev/tty.SLAB_USBtoUART'
 port='/dev/ttyUSB0'
 def receive(data,optional):
-	print(data,optional)
+	print("e,data=%s,optional=%s" %  (data,optional))
 lp_serial=LinptechSerial(port,receive=receive)
 lp_serial.setDaemon(True)
 lp_serial.start()
