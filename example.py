@@ -5,14 +5,16 @@ import logging
 
 logging.getLogger().setLevel(logging.DEBUG)
 print(CON.RECEIVE_LEN_LIST)
-port ='/dev/tty.SLAB_USBtoUART'
+#port ='/dev/tty.SLAB_USBtoUART'
+port='/dev/ttyUSB0'
 def receive(data,optional):
 	print(data,optional)
 lp_serial=LinptechSerial(port,receive=receive)
 lp_serial.setDaemon(True)
 lp_serial.start()
 while lp_serial.is_alive():
+	
 	time.sleep(5)
-	lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
-	time.sleep(5)
-	lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
+	#~ lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
+	#~ time.sleep(5)
+	#~ lp_serial.send("1f80016CB7"+CON.R3AC+"020100")

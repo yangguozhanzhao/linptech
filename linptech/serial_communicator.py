@@ -27,10 +27,27 @@ class LinptechSerial(threading.Thread):
 		# Set the receive method，对外接口，接收指令
 		self.receive = receive
 		# Internal variable for the Base ID of the module.
-		self.ser = serial.Serial(port, 57600, timeout=0.1)
+		self.port = port
+		self.ser = serial.Serial(self.port, 57600, timeout=0.1)
+		self.restart_num=0
 
-	def stop(self):
+	def restart(self):
 		self.stop_flag.set()
+		self.ser.close()
+		while self.stop_flag.is_set():
+			time.sleep(2)
+			try:
+				number = self.ser.inWaiting()
+				self.stop_flag.clear()
+				self.run()
+			except:
+				self.restart_num+=1
+				logging.info("reconnect serialport %d",self.restart_num)
+				try:
+					self.stop_flag.set()
+					self.ser = serial.Serial(self.port, 57600, timeout=0.1)
+				except:
+					pass
 
 	def send(self, data):
 		"""对外接口，发送指令"""
@@ -92,11 +109,9 @@ class LinptechSerial(threading.Thread):
 						self.buffer=self.split_buffer(self.buffer)
 					if Packet.check(self.buffer):
 						self.receive_queue.put(self.buffer)
-			except serial.SerialException:
-				print("error")
-				logging.error('Serial port exception! (device disconnected or multiple access on port?)')
-				self.stop()
-			self.get_from_receive_queue()
+						self.buffer=""
+			except:
+				self.restart()
 
 			# # If there's messages in transmit queue，send them
 			packet = self.get_from_send_queue()
@@ -104,8 +119,9 @@ class LinptechSerial(threading.Thread):
 				try:
 					logging.debug("send_packet=%s",packet)
 					self.ser.write(binascii.unhexlify(packet))
-				except serial.SerialException:
-					self.stop()
+				except:
+					self.restart()
+					
 			time.sleep(CON.SEND_INTERVAL)
 
 if __name__=="__main__":
