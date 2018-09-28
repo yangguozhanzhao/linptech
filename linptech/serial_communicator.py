@@ -79,16 +79,17 @@ class LinptechSerial(threading.Thread):
 			except queue.Empty:
 				pass
 
-	def split_buffer(self,buffer):
-		index = buffer.find("55",2*min(CON.RECEIVE_LEN_LIST))
-		if int(index/2) in CON.RECEIVE_LEN_LIST :
-			prev_buffer=buffer[0:index]
-			if Packet.check(prev_buffer):
-				self.receive_queue.put(prev_buffer)
-				self.get_from_receive_queue()
-			return buffer[index:]
-		else:
-			return buffer[index:]
+	def process_buffer(self,buffer):
+		if len(buffer) >= 4*min(CON.RECEIVE_LEN_LIST):
+			index = buffer.find("55",2*min(CON.RECEIVE_LEN_LIST))
+			if int(index/2) in CON.RECEIVE_LEN_LIST :
+				prev_buffer=buffer[0:index]
+				if Packet.check(prev_buffer):
+					self.receive_queue.put(prev_buffer)
+					#self.get_from_receive_queue()
+			self.process_buffer(buffer[index:])
+		elif Packet.check(buffer):
+			self.receive_queue.put(buffer)
 
 	def run(self):
 		"""
@@ -101,16 +102,12 @@ class LinptechSerial(threading.Thread):
 				number = self.ser.inWaiting()
 				# print(number)
 				if number >= min(CON.RECEIVE_LEN_LIST):
-					logging.debug("numner=%s" % number)
 					self.buffer += str(binascii.b2a_hex(self.ser.read(number)),encoding="utf-8")
-					logging.debug("buffer=%s" % self.buffer)
+					logging.debug("numner=%s,self.buffer=%s" % (number,self.buffer))
 					self.ser.flushInput()
 					# 多组数据同时进入，进行递归分割
-					while len(self.buffer) >= 4*min(CON.RECEIVE_LEN_LIST):
-						self.buffer=self.split_buffer(self.buffer)
-					if Packet.check(self.buffer):
-						self.receive_queue.put(self.buffer)
-						self.buffer=""
+					self.process_buffer(self.buffer)
+					self.buffer=""
 			except:
 				self.restart()
 			
@@ -130,19 +127,12 @@ if __name__=="__main__":
 	print(CON.RECEIVE_LEN_LIST)
 	port ='/dev/tty.SLAB_USBtoUART'
 	#port ="COM3"
-	r_data=""
 	def receive(data,optional):
-		global r_data
 		print(data,optional)
-		r_data=data
 	lp_serial=LinptechSerial(port,receive=receive)
 	lp_serial.setDaemon(True)
 	lp_serial.start()
 	while lp_serial.is_alive():
-		if r_data:
-			print("send_data=%s" % r_data)
-			r_data=""
-			lp_serial.send(r_data)
-		time.sleep(0.1)
+		time.sleep(5)
 		#lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
 		#lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
