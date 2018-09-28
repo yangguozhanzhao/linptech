@@ -80,8 +80,8 @@ class LinptechSerial(threading.Thread):
 				pass
 
 	def process_buffer(self,buffer):
-		if len(buffer) >= 4*min(CON.RECEIVE_LEN_LIST):
-			index = buffer.find("55",2*min(CON.RECEIVE_LEN_LIST))
+		if len(buffer) > 2*max(CON.RECEIVE_LEN_LIST):
+			index = buffer.find("550",2*min(CON.RECEIVE_LEN_LIST))
 			if int(index/2) in CON.RECEIVE_LEN_LIST :
 				prev_buffer=buffer[0:index]
 				if Packet.check(prev_buffer):
@@ -118,9 +118,9 @@ class LinptechSerial(threading.Thread):
 				try:
 					logging.debug("send_packet=%s",packet)
 					self.ser.write(binascii.unhexlify(packet))
-					time.sleep(CON.SEND_INTERVAL)
 				except:
 					self.restart()
+			time.sleep(CON.SEND_INTERVAL)
 
 if __name__=="__main__":
 	logging.getLogger().setLevel(logging.DEBUG)
