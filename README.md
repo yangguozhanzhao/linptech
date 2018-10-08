@@ -2,10 +2,12 @@
 
 领普科技串口通信协议
 
-## 安装
+## 安装与更新
 
-- `pip install linptech`
 - **仅支持python3**
+- 正式版安装 `pip install linptech` 更新 `pip install --upgrade linptech`
+- 测试版本 `pip install -i https://test.pypi.org/simple/ linptech` 更新 `pip install -i https://test.pypi.org/simple/ --upgrade linptech`
+
   
 ## 使用
 
@@ -32,8 +34,3 @@
         time.sleep(5)
         lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
   ```
-
-## 上传pypi
-
-- 修改setup.py的版本
-- 执行上传命令 `python setup.py sdist upload -r pypi`
