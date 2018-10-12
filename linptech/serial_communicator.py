@@ -51,10 +51,15 @@ class LinptechSerial(threading.Thread):
 
 	def send(self, data):
 		"""对外接口，发送指令"""
-		packet=Packet.create(data)
-		self.send_queue.put(packet)
-		logging.debug("send_queue=%s" % self.send_queue.qsize())
-		return True
+		try:
+			packet=Packet.create(data)
+			self.send_queue.put(packet)
+			logging.debug("send_queue=%s" % self.send_queue.qsize())
+			return True
+		except :
+			pass
+			
+		
 	
 	def get_from_send_queue(self):
 		""" Get message from transmit queue, if one exists """
@@ -81,14 +86,16 @@ class LinptechSerial(threading.Thread):
 
 	def process_buffer(self,buffer):
 		if len(buffer) > 2*max(CON.RECEIVE_LEN_LIST):
-			index = buffer.find("550",2*min(CON.RECEIVE_LEN_LIST))
-			if int(index/2) in CON.RECEIVE_LEN_LIST :
-				prev_buffer=buffer[0:index]
-				if Packet.check(prev_buffer):
-					self.receive_queue.put(prev_buffer)
-					#self.get_from_receive_queue()
-			self.process_buffer(buffer[index:])
-		elif Packet.check(buffer):
+			try:
+				index = buffer.find("550",2*min(CON.RECEIVE_LEN_LIST))
+				if int(index/2) in CON.RECEIVE_LEN_LIST :
+					prev_buffer=buffer[0:index]
+					if Packet.check(prev_buffer):
+						self.receive_queue.put(prev_buffer)
+				self.process_buffer(buffer[index:])
+			except :
+				pass
+		elif len(buffer)/2 in CON.RECEIVE_LEN_LIST and Packet.check(buffer):
 			self.receive_queue.put(buffer)
 
 	def run(self):

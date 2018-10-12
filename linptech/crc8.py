@@ -39,10 +39,13 @@ def crc8(data):
 	0x96, 0x91, 0x98, 0x9f, 0x8a, 0x8d, 0x84, 0x83,
 	0xde, 0xd9, 0xd0, 0xd7, 0xc2, 0xc5, 0xcc, 0xcb,
 	0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3]
+	try:
+		data = binascii.unhexlify(bytes(data, "UTF-8"))
+		crc = 0
+		for i in range(len(data)):
+			crc = CRC8_TABLE[crc ^ data[i]]
+			crc &= 0xff
+		return "{0:>02}".format(hex(crc & 0xff)[2:])
+	except :
+		return
 	
-	data = binascii.unhexlify(bytes(data, "UTF-8"))
-	crc = 0
-	for i in range(len(data)):
-		crc = CRC8_TABLE[crc ^ data[i]]
-		crc &= 0xff
-	return "{0:>02}".format(hex(crc & 0xff)[2:])

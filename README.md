@@ -7,7 +7,6 @@
 - **仅支持python3**
 - 正式版安装 `pip install linptech` 更新 `pip install --upgrade linptech`
 - 测试版本 `pip install -i https://test.pypi.org/simple/ linptech` 更新 `pip install -i https://test.pypi.org/simple/ --upgrade linptech`
-
   
 ## 使用
 
