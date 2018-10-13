@@ -4,7 +4,7 @@ import time
 import serial
 import binascii
 from linptech.packet import Packet
-import linptech.constant as CON
+from linptech.constant import SerialConfig
 import logging
 try:
 	import queue
@@ -85,17 +85,17 @@ class LinptechSerial(threading.Thread):
 				pass
 
 	def process_buffer(self,buffer):
-		if len(buffer) > 2*max(CON.RECEIVE_LEN_LIST):
+		if len(buffer) > 2*max(SerialConfig.RECEIVE_LEN_LIST):
 			try:
-				index = buffer.find("550",2*min(CON.RECEIVE_LEN_LIST))
-				if int(index/2) in CON.RECEIVE_LEN_LIST :
+				index = buffer.find("550",2*min(SerialConfig.RECEIVE_LEN_LIST))
+				if int(index/2) in SerialConfig.RECEIVE_LEN_LIST :
 					prev_buffer=buffer[0:index]
 					if Packet.check(prev_buffer):
 						self.receive_queue.put(prev_buffer)
 				self.process_buffer(buffer[index:])
 			except :
 				pass
-		elif len(buffer)/2 in CON.RECEIVE_LEN_LIST and Packet.check(buffer):
+		elif len(buffer)/2 in SerialConfig.RECEIVE_LEN_LIST and Packet.check(buffer):
 			self.receive_queue.put(buffer)
 
 	def run(self):
@@ -108,7 +108,7 @@ class LinptechSerial(threading.Thread):
 			try:
 				number = self.ser.inWaiting()
 				# print(number)
-				if number >= min(CON.RECEIVE_LEN_LIST):
+				if number >= min(SerialConfig.RECEIVE_LEN_LIST):
 					self.buffer += str(binascii.b2a_hex(self.ser.read(number)),encoding="utf-8")
 					logging.debug("numner=%s,self.buffer=%s" % (number,self.buffer))
 					self.ser.flushInput()
@@ -127,11 +127,11 @@ class LinptechSerial(threading.Thread):
 					self.ser.write(binascii.unhexlify(packet))
 				except:
 					self.restart()
-			time.sleep(CON.SEND_INTERVAL)
+			time.sleep(SerialConfig.SEND_INTERVAL)
 
 if __name__=="__main__":
 	logging.getLogger().setLevel(logging.DEBUG)
-	print(CON.RECEIVE_LEN_LIST)
+	print(SerialConfig.RECEIVE_LEN_LIST)
 	port ='/dev/tty.SLAB_USBtoUART'
 	#port ="COM3"
 	def receive(data,optional):
@@ -141,5 +141,4 @@ if __name__=="__main__":
 	lp_serial.start()
 	while lp_serial.is_alive():
 		time.sleep(5)
-		#lp_serial.send("1f80016CB7"+CON.R3AC+"020101")
-		#lp_serial.send("1f80016CB7"+CON.R3AC+"020100")
+
