@@ -57,7 +57,7 @@ class LinptechSerial(threading.Thread):
 			logging.debug("send_queue=%s" % self.send_queue.qsize())
 			return True
 		except :
-			pass
+			logging.error("send error")
 			
 		
 	
@@ -94,7 +94,7 @@ class LinptechSerial(threading.Thread):
 						self.receive_queue.put(prev_buffer)
 				self.process_buffer(buffer[index:])
 			except :
-				pass
+				logging.error("process buffer error")
 		elif len(buffer)/2 in SerialConfig.RECEIVE_LEN_LIST and Packet.check(buffer):
 			self.receive_queue.put(buffer)
 
@@ -116,6 +116,7 @@ class LinptechSerial(threading.Thread):
 					self.process_buffer(self.buffer)
 					self.buffer=""
 			except:
+				logging.error("run serial read data error")
 				self.restart()
 			
 			self.get_from_receive_queue()
@@ -126,6 +127,7 @@ class LinptechSerial(threading.Thread):
 					logging.debug("send_packet=%s",packet)
 					self.ser.write(binascii.unhexlify(packet))
 				except:
+					logging.error("run serial write data error")
 					self.restart()
 			time.sleep(SerialConfig.SEND_INTERVAL)
 

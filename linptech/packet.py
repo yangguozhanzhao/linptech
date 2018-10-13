@@ -42,10 +42,10 @@ class Packet(object):
 				optional=packet[12+data_len*2:26+data_len*2]
 				return data,optional
 			except :
-				logging.info("parse packet wrong")
+				logging.error("parse packet wrong")
 				return
 		else :
-			logging.info("packet is invalid")
+			logging.error("packet is invalid")
 			return
 	
 	@staticmethod
@@ -61,7 +61,7 @@ class Packet(object):
 			packet = "55"+m1+crc8(m1)+m2+crc8(m2)
 			return packet
 		except :
-			logging.info("create packet wrong")
+			logging.error("create packet wrong")
 			return
 			
 if __name__ == "__main__":

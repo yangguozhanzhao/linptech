@@ -47,5 +47,6 @@ def crc8(data):
 			crc &= 0xff
 		return "{0:>02}".format(hex(crc & 0xff)[2:])
 	except :
+		print("crc wrong")
 		return
 	

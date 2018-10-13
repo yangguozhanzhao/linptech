@@ -1,7 +1,7 @@
 from enum import Enum
 
 class SerialConfig:
-    RECEIVE_LEN_LIST = [21,22,23,29]
+    RECEIVE_LEN_LIST = [21,22,23,24,29] #对应返回长度 07，08，09，0a，0f
     SEND_INTERVAL = 0.01
 
 class ReceiverType:
@@ -34,26 +34,34 @@ class TransmitChannel:
 # 报文类型
 class PacketType:
     switch = "00" #模拟发射器
-    control = "5f"  # 控制接收器（开关查）
-    control_back = "5e"  # 控制返回
+    state = "5f"  # 控制接收器（开关查）
+    state_back = "5e"  # 控制返回
     config = "5d"  # 配置接收器：配置id和配置中继
     config_back = "5c"  # 配置返回
 
 # 控制字节
 class CmdType:
     # 状态相关，用PacketType.control
-    control_state = "02" 
-    inquire_state = "01" 
+    read_state = "01"
+    write_state = "02" 
 
-    # id相关,用PacketType.config
+    # id相关和中继,用PacketType.config
+
+    # 01读取程序版本，
+    # 02 配置上电默认输出，
+    # 03 读取上电默认输出
+
+    write_relay = "04"
+    read_relay = "05"
+    # 06配置心跳 07读取心跳
+
+    read_id_len = "08"
+    delete_all_id = "09"
+    read_all_id = "0a"
+    read_one_id="0b"
+    read_id_exist="0c"
     write_id = "0d" 
     delete_id = "0e"
-    delete_all_id = "09"
-    inquire_id = "0a"
-
-    # 中继相关,用PacketType.config
-    config_relay = "04"
-    inquire_relay = "05"
 
 
 # 控制状态
