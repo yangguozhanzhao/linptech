@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='linptech',
-    version='0.1.6',
+    version='0.1.7',
     description='Linptech serial protocol',
     author='yangzhan',
     author_email='728074993@qq.com',
