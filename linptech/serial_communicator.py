@@ -105,19 +105,21 @@ class LinptechSerial(threading.Thread):
 		"""
 		logging.debug('LinptechSerial started')
 		while not self.stop_flag.is_set():
-			try:
-				number = self.ser.inWaiting()
-				# print(number)
-				if number >= min(SerialConfig.RECEIVE_LEN_LIST):
-					self.buffer += str(binascii.b2a_hex(self.ser.read(number)),encoding="utf-8")
-					logging.debug("numner=%s,self.buffer=%s" % (number,self.buffer))
-					self.ser.flushInput()
-					# 多组数据同时进入，进行递归分割
-					self.process_buffer(self.buffer)
-					self.buffer=""
-			except:
-				logging.error("run serial read data error")
-				self.restart()
+			for i in range(10):
+				time.sleep(SerialConfig.SEND_INTERVAL)
+				try:
+					number = self.ser.inWaiting()
+					# print(number)
+					if number >= min(SerialConfig.RECEIVE_LEN_LIST):
+						self.buffer += str(binascii.b2a_hex(self.ser.read(number)),encoding="utf-8")
+						logging.debug("numner=%s,self.buffer=%s" % (number,self.buffer))
+						self.ser.flushInput()
+						# 多组数据同时进入，进行递归分割
+						self.process_buffer(self.buffer)
+						self.buffer=""
+				except:
+					logging.error("run serial read data error")
+					self.restart()
 			
 			self.get_from_receive_queue()
 			# # If there's messages in transmit queue，send them
@@ -129,7 +131,6 @@ class LinptechSerial(threading.Thread):
 				except:
 					logging.error("run serial write data error")
 					self.restart()
-			time.sleep(SerialConfig.SEND_INTERVAL)
 
 if __name__=="__main__":
 	logging.getLogger().setLevel(logging.DEBUG)

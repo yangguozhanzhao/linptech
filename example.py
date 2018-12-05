@@ -160,7 +160,7 @@ class App(tk.Tk):
 				print("获取返回清除")
 				self.lp.forecasts.remove(f)
 				self.info.set(f["info"]+data[f["info_index"]:f["info_index"]+f["info_len"]])
-			elif time.time()-f["timestamp"] > 0.15:
+			elif time.time()-f["timestamp"] > 0.2:
 				print("再次发送")
 				f["count"]+=1
 				f["timestamp"]=time.time()

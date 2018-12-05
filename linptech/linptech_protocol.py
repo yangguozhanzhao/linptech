@@ -23,7 +23,7 @@ class LinptechProtocol(object):
 
 	def set_receiver_state(self,r_id,r_type,r_channel,state=State.on):
 		data = PacketType.state +r_id+r_type +CmdType.write_state +r_channel +state
-		back = PacketType.state_back+r_id+r_type+CmdType.write_state+r_channel+state
+		back = PacketType.state_back+r_id+r_type+CmdType.write_state+r_channel
 		self.ser.send(data)
 		self.forecasts.append({"timestamp":time.time(),"count":1,"data":data,"back":back,
 		"info":"设置接收器状态为(00关/01开)","info_index":16,"info_len":2})
