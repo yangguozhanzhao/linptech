@@ -64,7 +64,7 @@ class App(tk.Tk):
 		self.rssi_threshold_transmit = tk.IntVar()
 		self.rssi_threshold_transmit.set("70")
 
-		ttk.Checkbutton(device_lf, text="监听接收器",width=10,variable=self.is_listen_transmit).grid(row=1,column=0,)
+		ttk.Checkbutton(device_lf, text="监听发射器",width=10,variable=self.is_listen_transmit).grid(row=1,column=0,)
 		ttk.Label(device_lf,text="RSSI阈值：").grid(row=1,column=1)
 		tk.Spinbox(device_lf, from_=40,to=95,width=3,textvariable=self.rssi_threshold_transmit,wrap=True) .grid(row=1,column=2)
 
@@ -94,11 +94,11 @@ class App(tk.Tk):
 		.grid(row=0,column=1)
 
 		ttk.Button(command_lf,text="打开接收器",command=lambda : \
-		self.lp.set_receiver_state(self.receiver_id.get(),self.receiver_type.get(),self.receiver_channel.get(),State.on))\
+		self.lp.set_receiver_on(self.receiver_id.get(),self.receiver_type.get(),self.receiver_channel.get()))\
 		.grid(row=1,column=0)
 
 		ttk.Button(command_lf,text="关闭接收器",command=lambda : \
-		self.lp.set_receiver_state(self.receiver_id.get(),self.receiver_type.get(),self.receiver_channel.get(),State.off))\
+		self.lp.set_receiver_off(self.receiver_id.get(),self.receiver_type.get(),self.receiver_channel.get()))\
 		.grid(row=1,column=1)
 
 		ttk.Button(command_lf,text="读接收器状态",command=lambda : \
@@ -166,18 +166,20 @@ class App(tk.Tk):
 				f["timestamp"]=time.time()
 				self.lp.ser.send(f["data"])
 		# 监听接收器
-		if self.is_listen_receiver.get() and data[10:12] in ReceiverType.ALL \
-			and int(optional[0:2],16)<self.rssi_threshold_receiver.get():
-			self.receiver_id.set(data[2:10])
-			self.receiver_type.set(data[10:12])
-			self.receiver_channel.set(data[12:14])
-			self.receiver_rssi.set(int(optional[0:2],16))
-		if self.is_listen_transmit.get() and data[10:12] in TransmitType.ALL \
-			and int(optional[0:2],16)<self.rssi_threshold_transmit.get():
-			self.transmit_id.set(data[2:10])
-			self.transmit_type.set(data[10:12])
-			self.transmit_channel.set(data[12:14])
-			self.transmit_rssi.set(int(optional[0:2],16))
+		if (self.is_listen_receiver.get()==1) and (data[10:12] in ReceiverType.ALL):
+			if (int(optional[0:2],16)<self.rssi_threshold_receiver.get()):
+				self.receiver_id.set(data[2:10])
+				self.receiver_type.set(data[10:12])
+				self.receiver_channel.set(data[12:14])
+				self.receiver_rssi.set(int(optional[0:2],16))
+		if (self.is_listen_transmit.get()==1):
+			if (data[10:12] in TransmitType.ALL):
+				if (int(optional[0:2],16)<self.rssi_threshold_transmit.get()):
+					self.transmit_id.set(data[2:10])
+					self.transmit_type.set(data[10:12])
+					self.transmit_channel.set(data[12:14])
+					self.transmit_rssi.set(int(optional[0:2],16))
+		
 
 if __name__ == '__main__':
 	r_id="8001734d"
@@ -194,5 +196,3 @@ if __name__ == '__main__':
 		app.destroy()
 	app.protocol('WM_DELETE_WINDOW', closeWindow) 
 	app.mainloop()
-
-

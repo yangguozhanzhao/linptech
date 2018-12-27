@@ -4,7 +4,8 @@ from linptech.constant import (SerialConfig,ReceiverChannel,ReceiverType,
 TransmitType,TransmitChannel,PacketType,CmdType,State,BackState)
 import time
 
-logging.getLogger().setLevel(logging.DEBUG)
+
+logging.getLogger().setLevel(logging.ERROR)
 
 #liptech 设备协议的实现
 class LinptechProtocol(object):
@@ -20,19 +21,26 @@ class LinptechProtocol(object):
 				forecasts.remove(f)
 	# 模拟开关
 	def switch_on(self,t_id,t_type,t_channel):
-		self.ser.send(PacketType.switch +t_id+t_type +"2"+t_channel[-1])
+		self.ser.send(PacketType.switch +t_id+t_type +"3"+t_channel[-1])
 	
 	def switch_off(self,t_id,t_type,t_channel):
-		self.ser.send(PacketType.switch +t_id+t_type +"3"+t_channel[-1])
+		self.ser.send(PacketType.switch +t_id+t_type +"2"+t_channel[-1])
 
-	def set_receiver_state(self,r_id,r_type,r_channel,state=State.on):
-		data = PacketType.state +r_id+r_type +CmdType.write_state +r_channel +state
-		back = PacketType.state_back+r_id+r_type+CmdType.write_state+r_channel
+	def set_receiver_on(self,r_id,r_type,r_channel):
+		data = PacketType.state +r_id+r_type +CmdType.write_state +r_channel +r_channel
+		back = PacketType.state_back+r_id+r_type+CmdType.write_state
 		self.ser.send(data)
 		self.check_repeat(r_id,self.forecasts)
 		self.forecasts.append({"timestamp":time.time(),"count":1,"data":data,"back":back,
 		"info":"设置接收器状态为(00关/01开)","info_index":16,"info_len":2})
-
+	
+	def set_receiver_off(self,r_id,r_type,r_channel):
+		data = PacketType.state +r_id+r_type +CmdType.write_state +r_channel +State.off
+		back = PacketType.state_back+r_id+r_type+CmdType.write_state
+		self.ser.send(data)
+		self.check_repeat(r_id,self.forecasts)
+		self.forecasts.append({"timestamp":time.time(),"count":1,"data":data,"back":back,
+		"info":"设置接收器状态为(00关/01开)","info_index":16,"info_len":2})
 
 	def read_receiver_state(self,r_id,r_type):
 		data = PacketType.state +r_id+r_type +CmdType.read_state

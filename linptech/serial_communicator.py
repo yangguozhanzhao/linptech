@@ -75,7 +75,7 @@ class LinptechSerial(threading.Thread):
 		get packet from receive queue
 		and as parameter pass to receive()
 		"""
-		while not self.receive_queue.empty()>0:
+		while not self.receive_queue.empty():
 			try:
 				logging.debug("receive_queue=%s" % self.receive_queue.qsize())
 				packet=self.receive_queue.get()
@@ -107,6 +107,7 @@ class LinptechSerial(threading.Thread):
 		while not self.stop_flag.is_set():
 			for i in range(10):
 				time.sleep(SerialConfig.SEND_INTERVAL)
+				
 				try:
 					number = self.ser.inWaiting()
 					# print(number)
@@ -117,11 +118,11 @@ class LinptechSerial(threading.Thread):
 						# 多组数据同时进入，进行递归分割
 						self.process_buffer(self.buffer)
 						self.buffer=""
+					self.get_from_receive_queue()
 				except:
 					logging.error("run serial read data error")
 					self.restart()
-			
-			self.get_from_receive_queue()
+				
 			# # If there's messages in transmit queue，send them
 			packet = self.get_from_send_queue()
 			if packet:

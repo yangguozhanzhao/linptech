@@ -2,7 +2,7 @@ from enum import Enum
 
 class SerialConfig:
     RECEIVE_LEN_LIST = [21,22,23,24,29] #对应返回长度 07，08，09，0a，0f
-    SEND_INTERVAL = 0.01
+    SEND_INTERVAL = 0.015
 
 class ReceiverType:
     R3AC = "81"
