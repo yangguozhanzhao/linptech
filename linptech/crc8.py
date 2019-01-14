@@ -46,7 +46,7 @@ def crc8(data):
 			crc = CRC8_TABLE[crc ^ data[i]]
 			crc &= 0xff
 		return "{0:>02}".format(hex(crc & 0xff)[2:])
-	except :
-		print("crc wrong")
+	except Exception as e :
+		print("crc wrong:%s" % e)
 		return
 	

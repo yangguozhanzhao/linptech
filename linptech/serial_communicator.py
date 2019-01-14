@@ -11,6 +11,8 @@ try:
 except ImportError:
 	import Queue as queue
 
+logging.getLogger().setLevel(logging.ERROR)
+
 class LinptechSerial(threading.Thread):
 	"""
 	- 实例化线程进行串口发送和读取
@@ -40,14 +42,14 @@ class LinptechSerial(threading.Thread):
 				number = self.ser.inWaiting()
 				self.stop_flag.clear()
 				self.run()
-			except:
+			except Exception as e:
 				self.restart_num+=1
-				logging.info("reconnect serialport %d",self.restart_num)
+				logging.error("reconnect serialport %d",self.restart_num)
 				try:
 					self.stop_flag.set()
 					self.ser = serial.Serial(self.port, 57600, timeout=0.1)
-				except:
-					pass
+				except Exception as e:
+					logging.error(e)
 
 	def send(self, data):
 		"""对外接口，发送指令"""
@@ -56,8 +58,8 @@ class LinptechSerial(threading.Thread):
 			self.send_queue.put(packet)
 			logging.debug("send_queue=%s" % self.send_queue.qsize())
 			return True
-		except :
-			logging.error("send error")
+		except Exception as e:
+			logging.error("send error:%s",e)
 			
 		
 	
@@ -93,8 +95,8 @@ class LinptechSerial(threading.Thread):
 					if Packet.check(prev_buffer):
 						self.receive_queue.put(prev_buffer)
 				self.process_buffer(buffer[index:])
-			except :
-				logging.error("process buffer error")
+			except Exception as e:
+				logging.error("process buffer error:%s" % e)
 		elif len(buffer)/2 in SerialConfig.RECEIVE_LEN_LIST and Packet.check(buffer):
 			self.receive_queue.put(buffer)
 
@@ -119,8 +121,8 @@ class LinptechSerial(threading.Thread):
 						self.process_buffer(self.buffer)
 						self.buffer=""
 					self.get_from_receive_queue()
-				except:
-					logging.error("run serial read data error")
+				except Exception as e:
+					logging.error("run serial read data error:%s" % e)
 					self.restart()
 				
 			# # If there's messages in transmit queue，send them
@@ -129,8 +131,8 @@ class LinptechSerial(threading.Thread):
 				try:
 					logging.debug("send_packet=%s",packet)
 					self.ser.write(binascii.unhexlify(packet))
-				except:
-					logging.error("run serial write data error")
+				except Exception as e:
+					logging.error("run serial write data error:%s" % e)
 					self.restart()
 
 if __name__=="__main__":

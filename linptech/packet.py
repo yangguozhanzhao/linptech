@@ -41,8 +41,8 @@ class Packet(object):
 				data=packet[12:12+data_len*2]
 				optional=packet[12+data_len*2:26+data_len*2]
 				return data,optional
-			except :
-				logging.error("parse packet wrong")
+			except Exception as e:
+				logging.error("parse packet wrong:%s",e)
 				return
 		else :
 			logging.error("packet is invalid")
@@ -60,8 +60,8 @@ class Packet(object):
 			m2 = data+optional
 			packet = "55"+m1+crc8(m1)+m2+crc8(m2)
 			return packet
-		except :
-			logging.error("create packet wrong")
+		except Exception as e:
+			logging.error("create packet wrong:%s",e)
 			return
 			
 if __name__ == "__main__":
